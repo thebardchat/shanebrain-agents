@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*.log
+*.db
+*.sqlite
+.env
+config.local.py
+logs/

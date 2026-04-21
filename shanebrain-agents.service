@@ -1,0 +1,17 @@
+[Unit]
+Description=ShaneBrain Agent Ecosystem — 7 AI Agents + Orchestrator
+After=network.target ollama.service
+Wants=ollama.service
+
+[Service]
+Type=simple
+User=shanebrain
+WorkingDirectory=/mnt/shanebrain-raid/shanebrain-core/agents
+ExecStart=/usr/bin/python3 server.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/mnt/shanebrain-raid/shanebrain-core/agents
+
+[Install]
+WantedBy=multi-user.target
