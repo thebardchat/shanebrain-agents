@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#050810"/>
+      <stop offset="100%" style="stop-color:#0b1124"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="30%" cy="40%" r="40%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="75%" cy="60%" r="35%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow1)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+
+  <!-- Grid lines -->
+  <g opacity="0.06" stroke="#7c3aed" stroke-width="1">
+    <line x1="0" y1="63" x2="1200" y2="63"/>
+    <line x1="0" y1="126" x2="1200" y2="126"/>
+    <line x1="0" y1="189" x2="1200" y2="189"/>
+    <line x1="0" y1="252" x2="1200" y2="252"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="378" x2="1200" y2="378"/>
+    <line x1="0" y1="441" x2="1200" y2="441"/>
+    <line x1="0" y1="504" x2="1200" y2="504"/>
+    <line x1="0" y1="567" x2="1200" y2="567"/>
+    <line x1="120" y1="0" x2="120" y2="630"/>
+    <line x1="240" y1="0" x2="240" y2="630"/>
+    <line x1="360" y1="0" x2="360" y2="630"/>
+    <line x1="480" y1="0" x2="480" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="720" y1="0" x2="720" y2="630"/>
+    <line x1="840" y1="0" x2="840" y2="630"/>
+    <line x1="960" y1="0" x2="960" y2="630"/>
+    <line x1="1080" y1="0" x2="1080" y2="630"/>
+  </g>
+
+  <!-- Orbit diagram (right side) -->
+  <!-- Orbit rings -->
+  <circle cx="880" cy="315" r="200" fill="none" stroke="#1a2a4a" stroke-width="1" stroke-dasharray="4 8" opacity="0.6"/>
+  <circle cx="880" cy="315" r="120" fill="none" stroke="#1a2a4a" stroke-width="1" stroke-dasharray="2 6" opacity="0.6"/>
+  <!-- Core -->
+  <circle cx="880" cy="315" r="45" fill="#0b1526" stroke="#7c3aed" stroke-width="2" opacity="0.9"/>
+  <text x="880" y="310" text-anchor="middle" fill="#7c3aed" font-size="11" font-family="monospace">PI 5</text>
+  <text x="880" y="326" text-anchor="middle" fill="#4a6080" font-size="9" font-family="monospace">CORE</text>
+  <!-- Connection lines -->
+  <line x1="880" y1="270" x2="880" y2="115" stroke="#06b6d4" stroke-width="0.8" opacity="0.4"/>
+  <line x1="880" y1="270" x2="1058" y2="197" stroke="#a78bfa" stroke-width="0.8" opacity="0.4"/>
+  <line x1="880" y1="360" x2="1060" y2="425" stroke="#f59e0b" stroke-width="0.8" opacity="0.4"/>
+  <line x1="880" y1="360" x2="966" y2="495" stroke="#34d399" stroke-width="0.8" opacity="0.4"/>
+  <line x1="880" y1="360" x2="766" y2="498" stroke="#f472b6" stroke-width="0.8" opacity="0.4"/>
+  <line x1="880" y1="270" x2="698" y2="199" stroke="#60a5fa" stroke-width="0.8" opacity="0.4"/>
+  <line x1="880" y1="315" x2="680" y2="315" stroke="#fb923c" stroke-width="0.8" opacity="0.4"/>
+  <!-- Agent nodes -->
+  <circle cx="880" cy="115" r="28" fill="#0b1526" stroke="#06b6d4" stroke-width="1.5"/>
+  <text x="880" y="112" text-anchor="middle" fill="#06b6d4" font-size="9" font-family="monospace">GUARDIAN</text>
+  <text x="880" y="124" text-anchor="middle" fill="#3d5070" font-size="8" font-family="monospace">security</text>
+  <circle cx="1058" cy="197" r="28" fill="#0b1526" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="1058" y="194" text-anchor="middle" fill="#a78bfa" font-size="9" font-family="monospace">LIBRARIAN</text>
+  <text x="1058" y="206" text-anchor="middle" fill="#3d5070" font-size="8" font-family="monospace">rag</text>
+  <circle cx="1060" cy="425" r="28" fill="#0b1526" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="1060" y="422" text-anchor="middle" fill="#f59e0b" font-size="9" font-family="monospace">DISPATCH</text>
+  <text x="1060" y="434" text-anchor="middle" fill="#3d5070" font-size="8" font-family="monospace">routing</text>
+  <circle cx="966" cy="495" r="28" fill="#0b1526" stroke="#34d399" stroke-width="1.5"/>
+  <text x="966" y="492" text-anchor="middle" fill="#34d399" font-size="9" font-family="monospace">BUILDER</text>
+  <text x="966" y="504" text-anchor="middle" fill="#3d5070" font-size="8" font-family="monospace">code</text>
+  <circle cx="766" cy="498" r="28" fill="#0b1526" stroke="#f472b6" stroke-width="1.5"/>
+  <text x="766" y="495" text-anchor="middle" fill="#f472b6" font-size="9" font-family="monospace">STORY</text>
+  <text x="766" y="507" text-anchor="middle" fill="#3d5070" font-size="8" font-family="monospace">narrative</text>
+  <circle cx="680" cy="315" r="28" fill="#0b1526" stroke="#fb923c" stroke-width="1.5"/>
+  <text x="680" y="312" text-anchor="middle" fill="#fb923c" font-size="9" font-family="monospace">OPS</text>
+  <text x="680" y="324" text-anchor="middle" fill="#3d5070" font-size="8" font-family="monospace">infra</text>
+  <circle cx="698" cy="199" r="28" fill="#0b1526" stroke="#60a5fa" stroke-width="1.5"/>
+  <text x="698" y="196" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="monospace">SOCIAL</text>
+  <text x="698" y="208" text-anchor="middle" fill="#3d5070" font-size="8" font-family="monospace">posting</text>
+
+  <!-- Left side text -->
+  <!-- Badge -->
+  <rect x="60" y="80" width="180" height="28" rx="14" fill="none" stroke="#7c3aed" stroke-width="1" opacity="0.6"/>
+  <text x="150" y="99" text-anchor="middle" fill="#7c3aed" font-size="11" font-family="monospace" letter-spacing="2">LIVE PRODUCTION</text>
+
+  <!-- Title -->
+  <text x="60" y="190" fill="#ffffff" font-size="62" font-weight="bold" font-family="monospace" letter-spacing="-2">shanebrain</text>
+  <text x="60" y="260" fill="#06b6d4" font-size="62" font-weight="bold" font-family="monospace" letter-spacing="-2">agents</text>
+
+  <!-- Divider -->
+  <line x1="60" y1="295" x2="400" y2="295" stroke="#1a2a4a" stroke-width="1"/>
+
+  <!-- Description -->
+  <text x="60" y="335" fill="#7d8fa8" font-size="18" font-family="monospace">7 AI agents · Raspberry Pi 5 · 24/7</text>
+  <text x="60" y="365" fill="#7d8fa8" font-size="18" font-family="monospace">Local Ollama + Claude API</text>
+
+  <!-- Agent pills -->
+  <g font-size="12" font-family="monospace">
+    <rect x="60" y="400" width="90" height="24" rx="4" fill="none" stroke="#06b6d4" stroke-width="1" opacity="0.6"/>
+    <text x="105" y="416" text-anchor="middle" fill="#06b6d4">guardian</text>
+    <rect x="160" y="400" width="90" height="24" rx="4" fill="none" stroke="#a78bfa" stroke-width="1" opacity="0.6"/>
+    <text x="205" y="416" text-anchor="middle" fill="#a78bfa">librarian</text>
+    <rect x="260" y="400" width="100" height="24" rx="4" fill="none" stroke="#f59e0b" stroke-width="1" opacity="0.6"/>
+    <text x="310" y="416" text-anchor="middle" fill="#f59e0b">dispatcher</text>
+    <rect x="60" y="434" width="80" height="24" rx="4" fill="none" stroke="#34d399" stroke-width="1" opacity="0.6"/>
+    <text x="100" y="450" text-anchor="middle" fill="#34d399">builder</text>
+    <rect x="150" y="434" width="95" height="24" rx="4" fill="none" stroke="#f472b6" stroke-width="1" opacity="0.6"/>
+    <text x="197" y="450" text-anchor="middle" fill="#f472b6">storyteller</text>
+    <rect x="255" y="434" width="55" height="24" rx="4" fill="none" stroke="#fb923c" stroke-width="1" opacity="0.6"/>
+    <text x="282" y="450" text-anchor="middle" fill="#fb923c">ops</text>
+    <rect x="320" y="434" width="65" height="24" rx="4" fill="none" stroke="#60a5fa" stroke-width="1" opacity="0.6"/>
+    <text x="352" y="450" text-anchor="middle" fill="#60a5fa">social</text>
+  </g>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="570" width="1200" height="60" fill="#060910" opacity="0.8"/>
+  <line x1="0" y1="570" x2="1200" y2="570" stroke="#1a2a4a" stroke-width="1"/>
+  <text x="60" y="603" fill="#3d5070" font-size="13" font-family="monospace">github.com/thebardchat/shanebrain-agents</text>
+  <text x="1140" y="603" text-anchor="end" fill="#7c3aed" font-size="13" font-family="monospace">Built by Shane + Claude Anthropic</text>
+</svg>
