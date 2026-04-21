@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShaneBrain Agents — 7-Agent AI Orchestration on Raspberry Pi 5</title>
+<meta name="description" content="Production multi-agent AI system running 24/7 on a Raspberry Pi 5. Seven specialized agents coordinated by a central orchestrator — local Ollama + Claude API.">
+<meta property="og:title" content="ShaneBrain Agents">
+<meta property="og:description" content="7-agent AI orchestration system running 24/7 on a Raspberry Pi 5.">
+<meta property="og:type" content="website">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #050810;
+    --bg2: #080d1a;
+    --purple: #7c3aed;
+    --cyan: #06b6d4;
+    --gold: #f59e0b;
+    --text: #c8d8f0;
+    --muted: #4a6080;
+    --border: #1a2a4a;
+    --card: #0b1526;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  canvas#neural {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+
+  /* Header */
+  .header { text-align: center; padding: 4rem 0 3rem; }
+  .badge { display: inline-block; background: rgba(124,58,237,0.15); border: 1px solid var(--purple); color: var(--purple); font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 2px; margin-bottom: 1.5rem; }
+  .header h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; letter-spacing: -0.02em; color: #fff; line-height: 1.1; }
+  .header h1 span { color: var(--cyan); }
+  .header p { margin-top: 1rem; font-size: 1rem; color: var(--muted); max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+  .header-meta { margin-top: 1.5rem; font-size: 0.7rem; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; }
+  .header-meta span { color: var(--gold); }
+
+  /* Referral */
+  .referral {
+    border: 1px solid rgba(245,158,11,0.3);
+    background: rgba(245,158,11,0.05);
+    border-radius: 4px;
+    padding: 0.8rem 1.5rem;
+    text-align: center;
+    margin: 0 auto 3rem;
+    max-width: 600px;
+    font-size: 0.8rem;
+    color: var(--text);
+  }
+  .referral a { color: var(--gold); text-decoration: none; font-weight: 600; }
+  .referral a:hover { text-decoration: underline; }
+
+  /* Orbit diagram */
+  .orbit-section { display: flex; justify-content: center; margin: 2rem 0 3rem; }
+  .orbit-svg { width: min(480px, 90vw); height: min(480px, 90vw); }
+
+  /* Agents grid */
+  .section-label { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+
+  .agent-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--agent-color, var(--purple));
+    border-radius: 4px;
+    padding: 1.2rem 1.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .agent-card:hover { box-shadow: 0 0 20px var(--agent-color, var(--purple)); border-color: var(--agent-color, var(--purple)); }
+  .agent-name { font-size: 0.9rem; font-weight: 700; color: var(--agent-color, var(--purple)); letter-spacing: 0.05em; text-transform: uppercase; }
+  .agent-role { font-size: 0.75rem; color: var(--text); margin-top: 0.4rem; }
+  .agent-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.8rem; }
+  .tag { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 2px; border: 1px solid; opacity: 0.7; }
+
+  /* Architecture */
+  .arch { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; margin-bottom: 3rem; }
+  .arch pre { font-size: 0.75rem; color: var(--text); line-height: 1.7; overflow-x: auto; }
+  .arch pre .hl { color: var(--cyan); }
+  .arch pre .dim { color: var(--muted); }
+
+  /* Stack */
+  .stack-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 3rem; }
+  .pill { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.4rem 0.9rem; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
+  .pill.live { border-color: var(--cyan); color: var(--cyan); }
+
+  /* Links */
+  .links { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem; }
+  .btn { display: inline-block; padding: 0.6rem 1.4rem; border-radius: 3px; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; font-family: 'Courier New', monospace; }
+  .btn-primary { background: var(--purple); color: #fff; }
+  .btn-primary:hover { background: #6d28d9; }
+  .btn-outline { border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* Constitution */
+  .constitution { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem 2rem; margin-bottom: 3rem; }
+  .constitution h3 { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+  .pillar { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 0.7rem; }
+  .pillar-num { color: var(--purple); font-size: 0.75rem; min-width: 1.5rem; }
+  .pillar-text { font-size: 0.8rem; color: var(--text); line-height: 1.5; }
+  .pillar-text strong { color: var(--cyan); }
+
+  /* Footer */
+  .footer { text-align: center; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; border-top: 1px solid var(--border); padding-top: 2rem; margin-top: 2rem; }
+
+  /* Sticky referral bar */
+  .sticky-ref { position: fixed; bottom: 0; left: 0; right: 0; z-index: 999; background: linear-gradient(90deg,#060910,#0b1124,#060910); border-top: 1px solid #1e3060; padding: 0.6rem 1.5rem; display: flex; align-items: center; justify-content: center; gap: 1.2rem; font-family: monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; }
+  .sticky-ref .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+  .sticky-ref span { color: var(--muted); }
+  .sticky-ref a { color: var(--cyan); text-decoration: none; }
+</style>
+</head>
+<body>
+<canvas id="neural"></canvas>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="badge">Live Production System</div>
+    <h1>ShaneBrain <span>Agents</span></h1>
+    <p>Seven specialized AI agents coordinated by a central orchestrator, running 24/7 on a Raspberry Pi 5. Local Ollama inference + Claude API. Not a demo — this is production infrastructure for one family's AI future.</p>
+    <div class="header-meta">Built by <span>Shane Brazelton + Claude Anthropic</span> · Hazel Green, AL</div>
+  </div>
+
+  <div class="referral">
+    <strong>Try Claude free for 2 weeks</strong> — the AI behind this entire ecosystem. <a href="https://claude.ai/referral/4fAMYN9Ing">Start your free trial →</a>
+  </div>
+
+  <!-- Orbit SVG -->
+  <div class="orbit-section">
+    <svg class="orbit-svg" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="core-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Orbit rings -->
+      <circle cx="240" cy="240" r="160" fill="none" stroke="#1a2a4a" stroke-width="1" stroke-dasharray="4 8"/>
+      <circle cx="240" cy="240" r="100" fill="none" stroke="#1a2a4a" stroke-width="1" stroke-dasharray="2 6"/>
+      <!-- Core glow -->
+      <circle cx="240" cy="240" r="60" fill="url(#core-glow)"/>
+      <!-- Pi core -->
+      <circle cx="240" cy="240" r="30" fill="#0b1526" stroke="#7c3aed" stroke-width="1.5" filter="url(#glow)"/>
+      <text x="240" y="235" text-anchor="middle" fill="#7c3aed" font-size="9" font-family="monospace">PI 5</text>
+      <text x="240" y="248" text-anchor="middle" fill="#4a6080" font-size="7" font-family="monospace">ORCHESTRATOR</text>
+      <!-- Agent nodes — 7 around the ring -->
+      <g id="agents">
+        <!-- guardian 0° -->
+        <line x1="240" y1="240" x2="240" y2="80" stroke="#06b6d4" stroke-width="0.5" opacity="0.4"/>
+        <circle cx="240" cy="80" r="22" fill="#0b1526" stroke="#06b6d4" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="240" y="77" text-anchor="middle" fill="#06b6d4" font-size="7" font-family="monospace">GUARDIAN</text>
+        <text x="240" y="88" text-anchor="middle" fill="#4a6080" font-size="6" font-family="monospace">security</text>
+        <!-- librarian 51° -->
+        <line x1="240" y1="240" x2="367" y2="139" stroke="#a78bfa" stroke-width="0.5" opacity="0.4"/>
+        <circle cx="367" cy="139" r="22" fill="#0b1526" stroke="#a78bfa" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="367" y="136" text-anchor="middle" fill="#a78bfa" font-size="7" font-family="monospace">LIBRARIAN</text>
+        <text x="367" y="147" text-anchor="middle" fill="#4a6080" font-size="6" font-family="monospace">rag/memory</text>
+        <!-- dispatcher 103° -->
+        <line x1="240" y1="240" x2="400" y2="276" stroke="#f59e0b" stroke-width="0.5" opacity="0.4"/>
+        <circle cx="400" cy="276" r="22" fill="#0b1526" stroke="#f59e0b" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="400" y="273" text-anchor="middle" fill="#f59e0b" font-size="7" font-family="monospace">DISPATCH</text>
+        <text x="400" y="284" text-anchor="middle" fill="#4a6080" font-size="6" font-family="monospace">routing</text>
+        <!-- builder 154° -->
+        <line x1="240" y1="240" x2="309" y2="390" stroke="#34d399" stroke-width="0.5" opacity="0.4"/>
+        <circle cx="309" cy="390" r="22" fill="#0b1526" stroke="#34d399" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="309" y="387" text-anchor="middle" fill="#34d399" font-size="7" font-family="monospace">BUILDER</text>
+        <text x="309" y="398" text-anchor="middle" fill="#4a6080" font-size="6" font-family="monospace">code/files</text>
+        <!-- storyteller 206° -->
+        <line x1="240" y1="240" x2="134" y2="376" stroke="#f472b6" stroke-width="0.5" opacity="0.4"/>
+        <circle cx="134" cy="376" r="22" fill="#0b1526" stroke="#f472b6" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="134" y="373" text-anchor="middle" fill="#f472b6" font-size="7" font-family="monospace">STORY</text>
+        <text x="134" y="384" text-anchor="middle" fill="#4a6080" font-size="6" font-family="monospace">narrative</text>
+        <!-- ops 257° -->
+        <line x1="240" y1="240" x2="84" y2="258" stroke="#fb923c" stroke-width="0.5" opacity="0.4"/>
+        <circle cx="84" cy="258" r="22" fill="#0b1526" stroke="#fb923c" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="84" y="255" text-anchor="middle" fill="#fb923c" font-size="7" font-family="monospace">OPS</text>
+        <text x="84" y="266" text-anchor="middle" fill="#4a6080" font-size="6" font-family="monospace">systemd</text>
+        <!-- social 309° -->
+        <line x1="240" y1="240" x2="130" y2="120" stroke="#60a5fa" stroke-width="0.5" opacity="0.4"/>
+        <circle cx="130" cy="120" r="22" fill="#0b1526" stroke="#60a5fa" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="130" y="117" text-anchor="middle" fill="#60a5fa" font-size="7" font-family="monospace">SOCIAL</text>
+        <text x="130" y="128" text-anchor="middle" fill="#4a6080" font-size="6" font-family="monospace">posting</text>
+      </g>
+      <!-- Animated pulse ring -->
+      <circle cx="240" cy="240" r="30" fill="none" stroke="#7c3aed" stroke-width="0.5" opacity="0.6">
+        <animate attributeName="r" values="30;60;30" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+
+  <!-- Agents -->
+  <div class="section-label">The Seven Agents</div>
+  <div class="agents-grid">
+    <div class="agent-card" style="--agent-color:#06b6d4">
+      <div class="agent-name">Guardian</div>
+      <div class="agent-role">Security monitoring, anomaly detection, system health alerts</div>
+      <div class="agent-tags">
+        <span class="tag" style="color:#06b6d4;border-color:#06b6d4">security</span>
+        <span class="tag" style="color:#4a6080;border-color:#1a2a4a">weaviate</span>
+      </div>
+    </div>
+    <div class="agent-card" style="--agent-color:#a78bfa">
+      <div class="agent-name">Librarian</div>
+      <div class="agent-role">RAG ingestion, Weaviate knowledge management, daily auto-ingest</div>
+      <div class="agent-tags">
+        <span class="tag" style="color:#a78bfa;border-color:#a78bfa">rag</span>
+        <span class="tag" style="color:#4a6080;border-color:#1a2a4a">ollama</span>
+      </div>
+    </div>
+    <div class="agent-card" style="--agent-color:#f59e0b">
+      <div class="agent-name">Dispatcher</div>
+      <div class="agent-role">Routes tasks between agents, manages work queue and priorities</div>
+      <div class="agent-tags">
+        <span class="tag" style="color:#f59e0b;border-color:#f59e0b">orchestration</span>
+      </div>
+    </div>
+    <div class="agent-card" style="--agent-color:#34d399">
+      <div class="agent-name">Builder</div>
+      <div class="agent-role">Code generation, repository updates, file operations via Claude API</div>
+      <div class="agent-tags">
+        <span class="tag" style="color:#34d399;border-color:#34d399">claude api</span>
+        <span class="tag" style="color:#4a6080;border-color:#1a2a4a">codegen</span>
+      </div>
+    </div>
+    <div class="agent-card" style="--agent-color:#f472b6">
+      <div class="agent-name">Storyteller</div>
+      <div class="agent-role">MEGA crew narrative engine, episode generation, voice processing</div>
+      <div class="agent-tags">
+        <span class="tag" style="color:#f472b6;border-color:#f472b6">creative</span>
+        <span class="tag" style="color:#4a6080;border-color:#1a2a4a">llama3.2</span>
+      </div>
+    </div>
+    <div class="agent-card" style="--agent-color:#fb923c">
+      <div class="agent-name">Ops</div>
+      <div class="agent-role">Systemd, Docker, 4-node Ollama cluster management</div>
+      <div class="agent-tags">
+        <span class="tag" style="color:#fb923c;border-color:#fb923c">infrastructure</span>
+        <span class="tag" style="color:#4a6080;border-color:#1a2a4a">docker</span>
+      </div>
+    </div>
+    <div class="agent-card" style="--agent-color:#60a5fa">
+      <div class="agent-name">Social</div>
+      <div class="agent-role">Facebook and Discord posting, engagement, friend profiling</div>
+      <div class="agent-tags">
+        <span class="tag" style="color:#60a5fa;border-color:#60a5fa">social</span>
+        <span class="tag" style="color:#4a6080;border-color:#1a2a4a">automation</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="section-label">Architecture</div>
+  <div class="arch">
+    <pre><span class="hl">orchestrator.py</span>  ←→  FastAPI server (port 8400)
+     │
+     ├── <span class="hl">guardian/</span>      <span class="dim">· Weaviate SecurityLog</span>
+     ├── <span class="hl">librarian/</span>     <span class="dim">· text2vec-ollama (nomic-embed-text, 768-dim)</span>
+     ├── <span class="hl">dispatcher/</span>    <span class="dim">· task queue, priority routing</span>
+     ├── <span class="hl">builder/</span>       <span class="dim">· Claude API (Sonnet 4.6)</span>
+     ├── <span class="hl">storyteller/</span>   <span class="dim">· llama3.2:3b via local Ollama</span>
+     ├── <span class="hl">ops/</span>           <span class="dim">· systemd + Docker control plane</span>
+     ├── <span class="hl">social/</span>        <span class="dim">· Facebook Graph API + Discord</span>
+     └── <span class="hl">shared/</span>        <span class="dim">· config, base_agent, logger, red_lines</span></pre>
+  </div>
+
+  <!-- Stack -->
+  <div class="section-label">Stack</div>
+  <div class="stack-row">
+    <span class="pill live">Raspberry Pi 5</span>
+    <span class="pill live">Python 3.13</span>
+    <span class="pill live">Ollama 0.17.7</span>
+    <span class="pill live">Claude API</span>
+    <span class="pill live">Weaviate 1.36.2</span>
+    <span class="pill live">FastAPI</span>
+    <span class="pill">llama3.2:3b</span>
+    <span class="pill">nomic-embed-text</span>
+    <span class="pill">Docker</span>
+    <span class="pill">Tailscale</span>
+  </div>
+
+  <!-- Constitution -->
+  <div class="section-label">Agent Constitution</div>
+  <div class="constitution">
+    <h3>Laws All Agents Follow</h3>
+    <div class="pillar"><span class="pillar-num">I</span><span class="pillar-text"><strong>Never act on another person's private data</strong> without explicit authorization from the system owner.</span></div>
+    <div class="pillar"><span class="pillar-num">II</span><span class="pillar-text"><strong>Prefer reversible actions.</strong> If an action cannot be undone, require confirmation before executing.</span></div>
+    <div class="pillar"><span class="pillar-num">III</span><span class="pillar-text"><strong>Log everything.</strong> Every action writes to Weaviate. Silence is a red flag, not efficiency.</span></div>
+    <div class="pillar"><span class="pillar-num">IV</span><span class="pillar-text"><strong>Stay in your lane.</strong> Agents do not modify other agents' core files. Orchestrator coordinates, agents execute.</span></div>
+    <div class="pillar"><span class="pillar-num">V</span><span class="pillar-text"><strong>Local first.</strong> Always prefer local Ollama inference over cloud APIs for routine tasks.</span></div>
+    <div class="pillar"><span class="pillar-num">VI</span><span class="pillar-text"><strong>Human in the loop.</strong> No financial transactions, no irreversible infrastructure changes, no public posts without pre-approval.</span></div>
+    <div class="pillar"><span class="pillar-num">VII</span><span class="pillar-text"><strong>Red lines are absolute.</strong> red_lines.py defines hard stops. No agent may override them.</span></div>
+  </div>
+
+  <!-- Links -->
+  <div class="section-label">Links</div>
+  <div class="links">
+    <a class="btn btn-primary" href="https://github.com/thebardchat/shanebrain-agents">GitHub →</a>
+    <a class="btn btn-outline" href="https://github.com/thebardchat/shanebrain_mcp">MCP Server (42 tools)</a>
+    <a class="btn btn-outline" href="https://github.com/thebardchat/mega-crew">MEGA Crew</a>
+    <a class="btn btn-outline" href="https://github.com/thebardchat">thebardchat</a>
+  </div>
+
+  <div class="footer">
+    Built by Shane Brazelton + Claude Anthropic · GPL v3 · Hazel Green, AL
+  </div>
+</div>
+
+<!-- Sticky referral bar -->
+<div class="sticky-ref">
+  <span class="dot"></span>
+  <span>Try Claude free for 2 weeks —</span>
+  <a href="https://claude.ai/referral/4fAMYN9Ing" target="_blank" rel="noopener">Start your free trial →</a>
+  <span>· AI behind this ecosystem</span>
+</div>
+
+<script>
+// Neural network canvas
+const canvas = document.getElementById('neural');
+const ctx = canvas.getContext('2d');
+let W, H, nodes = [], frame = 0;
+const COLORS = ['#7c3aed','#06b6d4','#f59e0b','#34d399','#f472b6','#fb923c','#60a5fa'];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function initNodes(n = 60) {
+  nodes = [];
+  for (let i = 0; i < n; i++) {
+    nodes.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 2 + 1,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      pulse: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  frame++;
+  const MAX = 150;
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i];
+    a.x += a.vx; a.y += a.vy;
+    if (a.x < 0 || a.x > W) a.vx *= -1;
+    if (a.y < 0 || a.y > H) a.vy *= -1;
+    a.pulse += 0.02;
+    for (let j = i + 1; j < nodes.length; j++) {
+      const b = nodes[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < MAX) {
+        ctx.strokeStyle = a.color;
+        ctx.globalAlpha = (1 - d / MAX) * 0.25;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(a.pulse);
+    ctx.fillStyle = a.color;
+    ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', () => { resize(); initNodes(); });
+resize(); initNodes(); draw();
+</script>
+</body>
+</html>
